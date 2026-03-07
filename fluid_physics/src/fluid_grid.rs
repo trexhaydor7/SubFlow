@@ -3,6 +3,9 @@ pub struct FluidGrid {
     nx: usize,
     ny: usize,
     nz: usize,
+    active: Vec<bool>
+
+    dt: f32,
 
     //Updated values
     vecx: Vec<f32>,
@@ -24,6 +27,8 @@ impl FluidGrid {
             nx,
             ny,
             nz,
+            active: true,
+            dt: 0.0, 
             vecx: vec![0.0; size],
             vecy: vec![0.0; size],
             vecz: vec![0.0; size],
@@ -73,4 +78,23 @@ impl FluidGrid {
         let i = self.idx(x, y, z);
         self.density[i] = density;
     }
+
+    pub fn advect(&mut self, dt:f32) {
+        
+
+    }
+
+   /*pub fn diffuse(&self) {
+
+    } 
+   */
+
+    pub fn project(&mut self) {
+
+    }
+
+    pub fn step (&mut self, dt: f32) {
+        
+    }
+
 }
