@@ -1,3 +1,5 @@
+constant dt_STEP = 0.1; //for 60 FPS
+
 pub struct FluidGrid {
     //Size of grid
     nx: usize,
@@ -51,6 +53,14 @@ impl FluidGrid {
     pub fn nz(&self) -> usize {
         self.nz
     }
+
+    pub fn get_dt(&self) -> f32 {
+        self.dt
+    }
+
+    pub fn increment_dt(&mut self, dt: f32) {
+        self.dt = dt + dt_STEP;
+    }
     pub fn idx(&self, x: usize, y: usize, z: usize) -> usize {
         return x + y * self.nx + z * self.nx * self.ny;
     }
@@ -79,22 +89,47 @@ impl FluidGrid {
         self.density[i] = density;
     }
 
-    pub fn advect(&mut self, dt:f32) {
+    
+    pub fn step (&mut self, dt: f32) {
         
-
     }
 
-   /*pub fn diffuse(&self) {
-
-    } 
-   */
+    pub fn advect(&mut self, dt:f32) {
+        
+    }
 
     pub fn project(&mut self) {
 
     }
 
-    pub fn step (&mut self, dt: f32) {
-        
+    //Vector in the form [nx, ny, nz, x, y, z, density. x, y, z, density, ...]
+    pub fn raw_3d_matrix(&self) -> Vec<f32> {
+        let mut buf = Vec::new();
+
+        //Return total matrix size
+        buf.push(self.nx as f32);
+        buf.push(self.ny as f32);
+        buf.push(self.nz as f32);
+
+        //Then return total information of the 3D matrix
+        for z in 0..self.nz {
+            for y in 0..self.ny {
+                for x in 0..self.nx {
+                    let i = self.idx(x, y, z);
+                    buf.push(x as f32);
+                    buf.push(y as f32);
+                    buf.push(z as f32);
+                    buf.push(self.density[i]);
+                }
+            }
+        }
+        buf
     }
+
+    /*
+    pub fn diffuse(&self) {
+
+    } 
+   */
 
 }

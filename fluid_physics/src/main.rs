@@ -1,7 +1,10 @@
+use wasm_bindgen::prelude::*;
+
 mod fluid_grid;
 use fluid_grid::FluidGrid;
 
-fn main() {
+#[wasm_bindgen]
+pub fn main() {
     println!("Running fluid grid tests...\n");
 
     test_grid_creation();
