@@ -1,3 +1,2 @@
 A flood simulator using Navier-Stokes implementation in Rust
-testing
-testing2
+Credit 3JS for engine: https://threejs.org/manual/#en/installation
