@@ -90,12 +90,29 @@ impl FluidGrid {
         self.density[i] = density;
     }
 
+    pub fn set_active(&mut self, x: usize, y: usize, z: usize, active: bool) {
+    let i = self.idx(x, y, z);
+    self.active[i] = active;
+    }
+
     pub fn step(&mut self, dt: f32) {
         self.increment_dt();
         self.integrate(dt); // apply gravity
         self.project();          // fix incompressibility
         self.extrapolate();      // fix boundaries
         self.advect(dt);         // move density according to velocity
+
+        for i in 0..self.density.len() {
+        if self.density[i].is_nan() { self.density[i] = 0.0; }
+        if self.vecx[i].is_nan() { self.vecx[i] = 0.0; }
+        if self.vecy[i].is_nan() { self.vecy[i] = 0.0; }
+        if self.vecz[i].is_nan() { self.vecz[i] = 0.0; }
+        // Also clamp velocity to prevent explosion
+        self.vecx[i] = self.vecx[i].clamp(-20.0, 20.0);
+        self.vecy[i] = self.vecy[i].clamp(-20.0, 20.0);
+        self.vecz[i] = self.vecz[i].clamp(-20.0, 20.0);
+        self.density[i] = self.density[i].clamp(0.0, 1.0);
+    }
     }
 
     pub fn advect(&mut self, dt: f32) {

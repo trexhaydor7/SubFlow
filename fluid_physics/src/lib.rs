@@ -45,4 +45,8 @@ impl FluidSim {
     pub fn set_density(&mut self, x: usize, y: usize, z: usize, density: f32) {
         self.grid.set_density(x, y, z, density);
     }
+
+    pub fn set_active(&mut self, x: usize, y: usize, z: usize, active: bool) {
+    self.grid.set_active(x, y, z, active);
+    }
 }
