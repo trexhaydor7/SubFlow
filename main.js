@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import init, { FluidSim } from './pkg/fluid_sim.js';
+import init, { FluidSim } from './fluid_physics/pkg/fluid_physics.js';
 
 class cell 
 {
@@ -76,10 +76,16 @@ const cityGrid = [];
 const xLength = rawMatrix.splice(0, 1)[0];
 const yLength = rawMatrix.splice(0, 1)[0];
 const zLength = rawMatrix.splice(0, 1)[0];
-for(let i = 0; i < (xLength * yLength * zLength); i = i + 4)
+console.log("Creation:");
+
+for(let i = 0; i < rawMatrix.length; i = i + 4)
 {
   cityGrid.push(new cell(rawMatrix[i], rawMatrix[i + 1], rawMatrix[i + 2], rawMatrix[i + 3]));
+  console.log("" + rawMatrix[i] + " " + rawMatrix[i + 1] + " " + rawMatrix[i + 2] + " " + rawMatrix[i + 3]);
 }
+console.log("");
+console.log("cityGrid length:", cityGrid.length);
+console.log("Non-zero cells:", cityGrid.filter(c => c.d > 0).length);
 
 let xLocation = 0;
 let yLocation = 0;
@@ -92,7 +98,7 @@ let solid = new THREE.Color('gray');
 let material = new THREE.MeshPhongMaterial({color: nothing});
 
 const cubeGrid = [];
-
+console.log("Adding to display");
 for(let i = 0; i < cityGrid.length; i++){
   xLocation = cityGrid[i].getX();
   yLocation = cityGrid[i].getY();
@@ -101,7 +107,7 @@ for(let i = 0; i < cityGrid.length; i++){
 
   let color, opacity;
 
-  if(cDensity==0){
+  if(cDensity < 0.001){
     continue;
   }
   else if(cDensity==1){
@@ -123,22 +129,25 @@ for(let i = 0; i < cityGrid.length; i++){
   const cube = new THREE.Mesh(geometry, material);
   cube.position.set(xLocation, yLocation, zLocation);
   scene.add(cube);
+  console.log(xLocation + " " + yLocation +" " + zLocation +" " +cDensity);
   cubeGrid.push(cube);
 }
 
 const camera = new THREE.PerspectiveCamera(45, view.clientWidth / view.clientHeight, 1, 1000);
-camera.position.set(50, 50, 100);
+camera.position.set(15, 15, 15);
 camera.lookAt(0, 0, 0);
+
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.enablePan = false;
 controls.minDistance = 5;
-controls.maxDistance = 20;
+controls.maxDistance = 50;
 controls.minPolarAngle = 0.5;
 controls.maxPolarAngle = 1.5;
 controls.autoRotate = false;
-controls.target = new THREE.Vector3(0, 1, 0);
+controls.target = new THREE.Vector3(5, 5, 5);
+camera.position.set(20, 20, 20);
 controls.update();
 
 const groundGeometry = new THREE.PlaneGeometry(20, 20, 32, 32);
