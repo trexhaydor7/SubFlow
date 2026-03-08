@@ -20,7 +20,7 @@
             overflow: hidden;
         }
         #controls {
-            background: #220058;
+            background: #051a2e;
             padding: 5px;
             min-width: 100px;
         }
@@ -44,7 +44,52 @@
   <div id="editor">
     <div id="view"><canvas id="c"></canvas></div>
     <div id="controls">
-      <div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:16px; padding:16px 8px; font-family:sans-serif;">
+
+        <!-- Speed buttons — horizontal row -->
+        <div style="color:#7ec8e3; font-size:8pt; letter-spacing:2px; text-transform:uppercase; align-self:flex-start; padding-left:2px;">Speed</div>
+        <div style="display:flex; flex-direction:row; gap:6px;">
+          <button id="btn-half"   style="flex:1; padding:8px 0; background:#0a2a44; color:#7ec8e3; border:1px solid #1a5a8a; border-radius:6px; font-size:12pt; cursor:pointer; min-width:48px;">½×</button>
+          <button id="btn-play"   style="flex:1; padding:8px 0; background:#0a2a44; color:#7ec8e3; border:1px solid #1a5a8a; border-radius:6px; font-size:14pt; cursor:pointer; min-width:48px; line-height:1;">⏸</button>
+          <button id="btn-double" style="flex:1; padding:8px 0; background:#0a2a44; color:#7ec8e3; border:1px solid #1a5a8a; border-radius:6px; font-size:12pt; cursor:pointer; min-width:48px;">2×</button>
+        </div>
+
+        <!-- Divider -->
+        <div style="width:100%; height:1px; background:#0d3a5a; margin:2px 0;"></div>
+
+        <!-- RGB sliders -->
+        <div style="color:#7ec8e3; font-size:8pt; letter-spacing:2px; text-transform:uppercase; align-self:flex-start; padding-left:2px;">Water Colour</div>
+
+        <div style="width:100%; display:flex; flex-direction:column; gap:10px;">
+          <!-- R -->
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <div style="display:flex; justify-content:space-between;">
+              <span style="color:#ff6666; font-size:8pt; letter-spacing:1px;">R</span>
+              <span id="lbl-r" style="color:#aaa; font-size:8pt;">13</span>
+            </div>
+            <input id="sld-r" type="range" min="0" max="255" value="13"
+              style="width:100%; accent-color:#ff4444; cursor:pointer;">
+          </div>
+          <!-- G -->
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <div style="display:flex; justify-content:space-between;">
+              <span style="color:#66ff99; font-size:8pt; letter-spacing:1px;">G</span>
+              <span id="lbl-g" style="color:#aaa; font-size:8pt;">140</span>
+            </div>
+            <input id="sld-g" type="range" min="0" max="255" value="140"
+              style="width:100%; accent-color:#44ff88; cursor:pointer;">
+          </div>
+          <!-- B -->
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <div style="display:flex; justify-content:space-between;">
+              <span style="color:#66aaff; font-size:8pt; letter-spacing:1px;">B</span>
+              <span id="lbl-b" style="color:#aaa; font-size:8pt;">242</span>
+            </div>
+            <input id="sld-b" type="range" min="0" max="255" value="242"
+              style="width:100%; accent-color:#4488ff; cursor:pointer;">
+          </div>
+        </div>
+
       </div>
     </div>
   </div>

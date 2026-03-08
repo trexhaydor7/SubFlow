@@ -8,10 +8,10 @@
 // This makes divergence exact: div(i) = vecx[x+1]-vecx[x] + vecy[y+1]-vecy[y] + vecz[z+1]-vecz[z]
 // and pressure corrections only touch the two faces shared with each neighbor.
 
-const GRAVITY: f32        = 0.3;   // near-zero — water stays flat and races outward
-const ITERATIONS: usize   = 250;   // maximum convergence for instant lateral spreading
-const OVERRELAX: f32      = 1.95;  // near-maximum for fastest pressure equalisation
-const DENSITY_DECAY: f32  = 0.9999; // almost no decay — flood sheet stays solid
+const GRAVITY: f32        = 2.5;   // stronger pull keeps water on the ground
+const ITERATIONS: usize   = 250;
+const OVERRELAX: f32      = 1.95;
+const DENSITY_DECAY: f32  = 0.9999;
 
 pub struct FluidGrid {
     nx: usize,
@@ -145,8 +145,10 @@ impl FluidGrid {
                         // Gentle horizontal viscosity: nudge x/z velocities toward
                         // their neighbors so pressure can spread laterally.
                         // This mimics incompressible fluid spreading sideways when blocked.
-                        // Damp vertical velocity to keep water flat and fast horizontally
-                        self.vecy[i] *= 0.85;
+                        // Aggressively damp upward velocity — water should not climb walls
+                        if self.vecy[i] > 0.0 {
+                            self.vecy[i] *= 0.6;
+                        }
 
                         if x > 0 && x < self.nx - 1 {
                             let left  = self.idx(x-1, y, z);
@@ -435,7 +437,7 @@ impl FluidGrid {
             if self.vecz[i].is_nan()    { self.vecz[i]    = 0.0; }
             if self.density[i].is_nan() { self.density[i] = 0.0; }
             self.vecx[i]    = self.vecx[i].clamp(-60.0, 60.0);
-            self.vecy[i]    = self.vecy[i].clamp(-15.0, 15.0);  // tight vertical clamp keeps it flat
+            self.vecy[i]    = self.vecy[i].clamp(-8.0, 4.0);   // hard asymmetric cap: falls freely, barely rises
             self.vecz[i]    = self.vecz[i].clamp(-60.0, 60.0);
             self.density[i] = (self.density[i] * DENSITY_DECAY).clamp(0.0, 1.0);
         }
