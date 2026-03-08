@@ -7,26 +7,17 @@ A real-time fluid simulator for flood situations for civil engineers and emergen
 
 ## How to run ⚙️
 
+Clone repository
+```
+git clone https://github.com/trexhaydor7/SubFlow.git
+```
 
-Run the following commands in terminal:
-bashcurl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs/ | sh
-
-bashsource "$HOME/.cargo/env"
-
-bashrustup target add wasm32-unknown-unknown
-
-bashcurl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-
-bashwasm-pack build --target web
-
-bashsudo npm install -g wasm-pack
-
-wasm-pack build --target web
-
-cd ..
-
-python3 -m http.server 8080
-
+Run setup script and start server
+```
+cd SubFlow
+chmod +x setup.sh
+./setup.sh
+```
 
 
 ## Acknowledgements ♥️
