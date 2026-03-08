@@ -66,11 +66,10 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const scene = new THREE.Scene();
+const clock = new THREE.Clock();
 
 await init();
 const sim = new FluidSim(10, 10, 10);
-sim.set_density(5, 5, 5, 1.0);
-sim.set_density(3, 3, 3, 0.5);
 const rawMatrix = Array.from(sim.raw_3d_matrix());
 const cityGrid = [];
 const xLength = rawMatrix.splice(0, 1)[0];
@@ -176,9 +175,37 @@ window.addEventListener('resize', () => {
   renderer.setSize(view.clientWidth, view.clientHeight);
 });
 
-function animate() {
-  requestAnimationFrame(animate);
+
+const PAN_SPEED = 0.05;
+
+canvas.addEventListener('wheel', (event) => {
+  event.preventDefault();
+
+  const forward = new THREE.Vector3();
+  camera.getWorldDirection(forward);
+  forward.y = 0;
+  forward.normalize();
+
+  const right = new THREE.Vector3();
+  right.crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
+
+  const panX = event.deltaX * PAN_SPEED;
+  const panZ = event.deltaY * PAN_SPEED;
+
+  const offset = new THREE.Vector3()
+    .addScaledVector(right, panX)
+    .addScaledVector(forward, -panZ);
+
+  controls.target.add(offset);
+  camera.position.add(offset);
   controls.update();
+
+}, { passive: false });
+
+function animate(speedConstant) {
+  const delta = clock.getDelta();
+  requestAnimationFrame(animate);
+  controls.update(delta * speedConstant);
   renderer.render(scene, camera);
 }
-animate();
+animate(1);
