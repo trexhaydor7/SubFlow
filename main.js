@@ -2,6 +2,57 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+class cell 
+{
+  constructor(x, y, z, d)
+  {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.d = d;
+  }
+  
+  getX()
+  {
+    return this.x;
+  }
+
+  getY()
+  {
+    return this.y;
+  }
+
+  getZ()
+  {
+    return this.z;
+  }
+
+  getD()
+  {
+    return this.d;
+  }
+  
+  setX(x)
+  {
+    this.x = x;
+  }
+
+  setY(y)
+  {
+    this.y = y;
+  }
+
+  setZ(z)
+  {
+    this.z = z;
+  }
+
+  setD(d)
+  {
+    this.d = d;
+  }
+}
+
 const canvas = document.getElementById('c');
 const view = document.getElementById('view');
 
@@ -17,9 +68,9 @@ const scene = new THREE.Scene();
 
 const rawMatrix = raw_3d_matrix();
 const cityGrid = [];
-const xLength = rawMatrix.splice(1, 0);
+const xLength = rawMatrix.splice(0, 1);
 const yLength = rawMatrix.splice(1, 1);
-const zLength = rawLength.splice(1, 2);
+const zLength = rawMatrix.splice(2, 1);
 for(let i = 0; i < (xLength * yLength * zLength); i = i + 4)
 {
   cityGrid.push(new cell(rawMatrix[i], rawMatrix[i + 1], rawMatrix[i + 2], rawMatrix[i + 3]));
@@ -30,10 +81,10 @@ let yLocation = 0;
 let zLocation = 0;
 let cDensity = 0;
 const geometry = new THREE.BoxGeometry(.1, .1, .1);
-let nothing = color('white');
-let blue = color('blue');
-let solid = color('gray');
-let material = new THREE.MeshPhongMaterial({nothing});
+let nothing = THREE.Color('white');
+let blue = THREE.Color('blue');
+let solid = THREE.Color('gray');
+let material = new THREE.MeshPhongMaterial({color: nothing});
 
 const cubeGrid = [];
 
@@ -101,28 +152,6 @@ spotLight.castShadow = true;
 spotLight.shadow.bias = -0.0001;
 scene.add(spotLight);
 
-const loader = new GLTFLoader().setPath('/millennium_falcon');
-loader.load('scene.gltf', (gltf) => {
-  console.log('loading model');
-  const mesh = gltf.scene;
-  mesh.traverse((child) => {
-    if (child.isMesh) {
-      child.castShadow = true;
-      child.receiveShadow = true;
-    }
-  });
-  mesh.position.set(0, 1.05, -1);
-  scene.add(mesh);
-
-  const el = document.getElementById('progress-container');
-  if (el) el.style.display = 'none';
-
-}, (xhr) => {
-  console.log(`loading ${xhr.loaded / xhr.total * 100}%`);
-}, (error) => {
-  console.error(error);
-});
-
 window.addEventListener('resize', () => {
   camera.aspect = view.clientWidth / view.clientHeight;
   camera.updateProjectionMatrix();
@@ -135,54 +164,3 @@ function animate() {
   renderer.render(scene, camera);
 }
 animate();
-
-class cell 
-{
-  constructor(x, y, z, d)
-  {
-    this.x = x;
-    this.y = y;
-    this.z = z;
-    this.d = d;
-  }
-  
-  getX()
-  {
-    return this.x;
-  }
-
-  getY()
-  {
-    return this.y;
-  }
-
-  getZ()
-  {
-    return this.z;
-  }
-
-  getD()
-  {
-    return this.d;
-  }
-  
-  setX(x)
-  {
-    this.x = x;
-  }
-
-  setY(y)
-  {
-    this.y = y;
-  }
-
-  setZ(z)
-  {
-    this.z = z;
-  }
-
-  setD(d)
-  {
-    this.d = d;
-  }
-}
