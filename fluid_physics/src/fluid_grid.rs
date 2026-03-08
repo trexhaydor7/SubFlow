@@ -1,9 +1,9 @@
 #![allow(dead_code, unused_variables)]
 
 const DT: f32 = 0.016; //for 60 FPS
-const gravity: f32 = 9.81;
-const iteration_project_amount: usize = 20;
-const o :f32 = 1.9; //Overrelaxation factor, voodoo magic atp
+const GRAVITY: f32 = 9.81;
+const ITERATION_AMOUNT: usize = 20;
+const OVERRELAXATION: f32 = 1.9; //Overrelaxation factor, voodoo magic atp
 
 pub struct FluidGrid {
     //Size of grid
@@ -93,7 +93,7 @@ impl FluidGrid {
 
     pub fn step(&mut self, dt: f32) {
         self.increment_dt();
-        self.integrate(gravity); // apply gravity
+        self.integrate(); // apply gravity
         self.project();          // fix incompressibility
         self.extrapolate();      // fix boundaries
         self.advect(dt);         // move density according to velocity
@@ -105,7 +105,7 @@ impl FluidGrid {
 
     //Fix the velocity field to be divergence-free. Only applies to active cells.
     pub fn project(&mut self) {
-    for i in 0..iteration_project_amount {
+    for i in 0..ITERATION_AMOUNT {
         for z in 0..self.nz {
             for y in 0..self.ny {
                 for x in 0..self.nx {
@@ -132,19 +132,32 @@ impl FluidGrid {
 
                             // Iterative solver for pressure
                             let j = self.idx(x, y, z);
-                            f32 sx = self.vecx[self.idx(x + 1, y, z)] - self.vecx[self.idx(x - 1, y, z)];
-                            f32 sy = self.vecy[self.idx(x, y + 1, z)] - self.vecy[self.idx(x, y - 1, z)];
-                            f32 sz = self.vecz[self.idx(x, y, z + 1)] - self.vecz[self.idx(x, y, z - 1)];
-                            let divergence = (sx + sy + sz) * 1.9;
 
-                            println!("Divergence at ({}, {}, {}) at {} iteration: {}", x, y, z, iteration_project_amount, divergence);         
+                            let sx : f32 = self.vecx[self.idx(x + 1, y, z)] - self.vecx[self.idx(x - 1, y, z)];
+                            let sy : f32 = self.vecy[self.idx(x, y + 1, z)] - self.vecy[self.idx(x, y - 1, z)];
+                            let sz : f32 = self.vecz[self.idx(x, y, z + 1)] - self.vecz[self.idx(x, y, z - 1)];
+                            let p = (sx + sy + sz) * OVERRELAXATION;
 
-                            self.vecx[self.idx(x-1, y, z)] -= sx0 * p;
-                            self.vecx[self.idx(x+1, y, z)] += sx1 * p;
-                            self.vecy[self.idx(x, y-1, z)] -= sy0 * p;
-                            self.vecy[self.idx(x, y+1, z)] += sy1 * p;
-                            self.vecz[self.idx(x, y, z-1)] -= sz0 * p;
-                            self.vecz[self.idx(x, y, z+1)] += sz1 * p;
+                            println!("Divergence at ({}, {}, {}) at {} iteration: {}", x, y, z, ITERATION_AMOUNT, p);         
+
+                            
+                            
+                            let i = self.idx(x, y, z);
+                            let i_xp1 = self.idx(x+1, y, z);
+                            let i_xm1 = self.idx(x-1, y, z);
+                            let i_yp1 = self.idx(x, y+1, z);
+                            let i_ym1 = self.idx(x, y-1, z);
+                            let i_zp1 = self.idx(x, y, z+1);
+                            let i_zm1 = self.idx(x, y, z-1);
+
+                            
+                            
+                            self.vecx[i_xm1] -= sx0 * p;
+                            self.vecx[i_xp1] += sx1 * p;
+                            self.vecy[i_ym1] -= sy0 * p;
+                            self.vecy[i_yp1] += sy1 * p;
+                            self.vecz[i_zm1] -= sz0 * p;
+                            self.vecz[i_zp1] += sz1 * p;
                         }
                     }
                 }
@@ -153,13 +166,13 @@ impl FluidGrid {
     }
 
     //Add gravity to the velocity field. Only applies to active cells.
-    pub fn integrate(&mut self, gravity: f32) {
+    pub fn integrate(&mut self) {
         for z in 0..self.nz {
             for y in 0..self.ny {
                 for x in 0..self.nx {
                     let i = self.idx(x, y, z);
                     if self.active[i] {
-                    self.vecy[i] -= gravity * dt;
+                    self.vecy[i] -= GRAVITY * self.get_dt();
                     }
                 }
             }
@@ -171,23 +184,38 @@ impl FluidGrid {
 
         //x faces
         for z in 0..self.nz {
-            for y in 0..self.ny {
-                self.vecx[self.idx(0, y, z)] = self.vecx[self.idx(1, y, z)];
-                self.vecx[self.idx(self.nx - 1, y, z)] = self.vecx[self.idx(self.nx - 2, y, z)];
+            for x in 0..self.nx {
+                let bar1 = self.idx(x, 0, z);
+                let active1 = self.idx(x, 1, z);
+                let bar2 = self.idx(x, self.ny-1, z);
+                let active2 = self.idx(x, self.ny-2, z);
+
+                self.vecx[bar1] = self.vecx[active1];
+                self.vecx[bar2] = self.vecx[active2];
                 }
             }
         //y faces
         for z in 0..self.nz {
             for y in 0..self.ny {
-                self.vecx[self.idx(x, 0, z)] = self.vecx[self.idx(x, 1, z)];
-                self.vecx[self.idx(x, self.ny-1, z)] = self.vecx[self.idx(x, self.ny-2, z)];
-                }
+                let bar1 = self.idx(0, y, z);
+                let active1 = self.idx(1, y, z);
+                let bar2 = self.idx(self.nx-1, y, z);
+                let active2 = self.idx(self.nx-2, y, z);
+
+                self.vecy[bar1] = self.vecx[active1];
+                self.vecy[bar2] = self.vecx[active2];
             }
+        }
          //z faces
-        for z in 0..self.nz {
-            for y in 0..self.ny {
-                self.vecx[self.idx(x, y, 0)] = self.vecx[self.idx(x, y, 1)];
-                self.vecx[self.idx(x, y, self.nz-1)] = self.vecx[self.idx(x, y, self.nz-2)];
+        for y in 0..self.ny {
+            for x in 0..self.nx {
+                let bar1 = self.idx(x, y, 0);
+                let active1 = self.idx(x, y, 1);
+                let bar2 = self.idx(x, y, self.nz-1);
+                let active2 = self.idx(x, y, self.nz-2);
+
+                self.vecx[bar1] = self.vecx[active1];
+                self.vecx[bar2] = self.vecx[active2];
                 }
             }
         }
